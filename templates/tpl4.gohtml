@@ -1,0 +1,10 @@
+<html>
+  <head><title>tits</title></head>
+  <body>
+    {{ $doubled := . | fdbl }}
+    {{ $doubled | fsq }}
+    {{ if gt . 1.0 }}
+      {{ template "nossa" . }}
+    {{end}}
+  </body>
+</html>
