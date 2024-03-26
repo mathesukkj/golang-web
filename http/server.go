@@ -31,7 +31,7 @@ func (m uai) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		req.ContentLength,
 	}
 
-	w.Header().Set("Mathesukkj-Header", "header customizado pai receba")
+	w.Header().Set("Mathesukkj-Header", "header customizado receba")
 
 	tpl.ExecuteTemplate(w, "index.gohtml", data)
 }
