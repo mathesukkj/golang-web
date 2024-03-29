@@ -18,7 +18,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "<img src='/images.jpeg' />")
 }
 
-func serveFile(w http.ResponseWriter, _ *http.Request) {
+func serveFile(w http.ResponseWriter, r *http.Request) {
 	f, err := os.Open("images.jpeg")
 	if err != nil {
 		http.Error(w, "file not found", 404)
@@ -26,5 +26,13 @@ func serveFile(w http.ResponseWriter, _ *http.Request) {
 	}
 	defer f.Close()
 
-	io.Copy(w, f)
+	fi, err := f.Stat()
+	if err != nil {
+		http.Error(w, "file not found", 404)
+		return
+	}
+
+	http.ServeContent(w, r, f.Name(), fi.ModTime(), f)
+	// io.Copy(w, f)
+
 }
