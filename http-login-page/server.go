@@ -23,6 +23,7 @@ var tpl *template.Template
 func main() {
 	http.HandleFunc("/", index)
 	http.HandleFunc("/signup", signup)
+	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/bar", bar)
 	http.ListenAndServe(":4080", nil)
 }
@@ -99,5 +100,46 @@ func signup(w http.ResponseWriter, r *http.Request) {
 		}
 
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
+func signin(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		tpl.ExecuteTemplate(w, "signup.gohtml", nil)
+	}
+
+	if r.Method == http.MethodPost {
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+
+		foundUser := dbUsers[username]
+		hashedPassword := []byte(foundUser.Password)
+
+		if bcrypt.CompareHashAndPassword(hashedPassword, []byte(password)) != nil {
+			http.Error(w, "wrong username or password", http.StatusUnauthorized)
+		}
+
+		sId := uuid.NewV4()
+
+		c := &http.Cookie{
+			Name:  "sessionId",
+			Value: sId.String(),
+		}
+
+		http.SetCookie(w, c)
+		dbSessions[sId.String()] = username
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		http.SetCookie(w, &http.Cookie{
+			Name:   "sessionId",
+			MaxAge: -1,
+		})
+
+		http.Redirect(w, r, "/signin", http.StatusFound)
 	}
 }
