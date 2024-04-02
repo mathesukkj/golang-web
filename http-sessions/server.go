@@ -31,10 +31,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 		})
 
 		generatedNumber := rand.Intn(999999999)
-		http.SetCookie(w, &http.Cookie{
-			Name:  "user",
-			Value: strconv.Itoa(generatedNumber),
-		})
 
 		users[id.String()] = generatedNumber
 	}
@@ -50,11 +46,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := r.Cookie("user")
-	if err != nil {
-		http.Error(w, "you arent logged in! go to / first.", http.StatusUnauthorized)
-		return
+	if user, ok := users[id.Value]; ok {
+		io.WriteString(w, "Your user is "+id.Value+" and your number is "+strconv.Itoa(user))
 	}
-
-	io.WriteString(w, "Your user is "+id.Value+" and your number is "+user.Value)
 }
