@@ -32,7 +32,7 @@ func init() {
 	tpl = template.Must(template.New("").ParseGlob("templates/*.gohtml"))
 }
 
-func getUser(r *http.Request) (User, error) {
+func getUser(w http.ResponseWriter, r *http.Request) (User, error) {
 	userCookie, err := r.Cookie("sessionId")
 	if err != nil {
 		return User{}, err
@@ -40,11 +40,12 @@ func getUser(r *http.Request) (User, error) {
 
 	username := dbSessions[userCookie.Value]
 	user := dbUsers[username]
+	http.SetCookie(w, userCookie)
 	return user, nil
 }
 
 func index(w http.ResponseWriter, r *http.Request) {
-	user, err := getUser(r)
+	user, err := getUser(w, r)
 	if err != nil {
 		http.Redirect(w, r, "/signup", http.StatusSeeOther)
 	}
@@ -53,7 +54,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 }
 
 func bar(w http.ResponseWriter, r *http.Request) {
-	user, err := getUser(r)
+	user, err := getUser(w, r)
 	if err != nil {
 		http.Redirect(w, r, "/signup", http.StatusSeeOther)
 	}
@@ -122,8 +123,9 @@ func signin(w http.ResponseWriter, r *http.Request) {
 		sId := uuid.NewV4()
 
 		c := &http.Cookie{
-			Name:  "sessionId",
-			Value: sId.String(),
+			Name:   "sessionId",
+			Value:  sId.String(),
+			MaxAge: 3600,
 		}
 
 		http.SetCookie(w, c)
