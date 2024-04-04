@@ -2,6 +2,7 @@ package main
 
 import (
 	"html/template"
+	"log"
 	"net/http"
 
 	uuid "github.com/satori/go.uuid"
@@ -25,11 +26,11 @@ func main() {
 	http.HandleFunc("/signup", signup)
 	http.HandleFunc("/logout", logout)
 	http.HandleFunc("/bar", bar)
-	http.ListenAndServe(":4080", nil)
+	log.Println(http.ListenAndServe(":80", nil))
 }
 
 func init() {
-	tpl = template.Must(template.New("").ParseGlob("templates/*.gohtml"))
+	tpl = template.Must(template.New("").ParseGlob("/home/ubuntu/templates/*.gohtml"))
 }
 
 func getUser(w http.ResponseWriter, r *http.Request) (User, error) {
